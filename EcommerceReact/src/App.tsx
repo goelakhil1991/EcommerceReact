@@ -1,121 +1,118 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import ProductCard from './components/ProductCard'
+import type { Product, CartItem } from './types/Product'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const products: Product[] = [
+    { id: 1, name: 'Laptop', price: 55000, inStock: true },
+    { id: 2, name: 'Headphones', price: 2500, inStock: true },
+    { id: 3, name: 'Keyboard', price: 1800, inStock: false }
+  ]
+
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
+
+  function handleAddToCart(product: Product): void {
+    setCartItems(previousItems => {
+      const existingItem = previousItems.find(
+        item => item.id === product.id
+      )
+
+      if (existingItem) {
+        return previousItems.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      }
+
+      return [...previousItems, { ...product, quantity: 1 }]
+    })
+
+    console.log(`${product.name} added to cart`)
+  }
+
+  function updateQuantity(productId: number, change: number): void {
+  setCartItems(previousItems =>
+    previousItems
+      .map(item =>
+        item.id === productId
+          ? { ...item, quantity: item.quantity + change }
+          : item
+      )
+      .filter(item => item.quantity > 0)
+  )
+}
+
+function removeFromCart(productId: number): void {
+  setCartItems(previousItems =>
+    previousItems.filter(item => item.id !== productId)
+  )
+}
+
+  const cartTotal = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity, 0
+  )
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div>
+      <h1>My Ecommerce Store</h1>
 
-      <div className="ticks"></div>
+      <h2 className="cart-count">
+        Cart Items: {cartItems.reduce(
+          (total, item) => total + item.quantity, 0
+        )}
+      </h2>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      <h2>
+        Cart Total: ₹{cartTotal.toLocaleString('en-IN')}
+      </h2>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <div>
+  <h2>Your Shopping Cart</h2>
+
+  {cartItems.length === 0 ? (
+    <p>Your cart is empty.</p>
+  ) : (
+    cartItems.map(item => (
+  <div key={item.id} className="cart-item">
+    <div>
+      <strong>{item.name}</strong>
+      <p>
+        ₹{item.price.toLocaleString('en-IN')} × {item.quantity}
+      </p>
+    </div>
+
+    <div>
+      <button onClick={() => updateQuantity(item.id, -1)}>
+        -
+      </button>
+
+      <span> {item.quantity} </span>
+
+      <button onClick={() => updateQuantity(item.id, 1)}>
+        +
+      </button>
+
+      <button onClick={() => removeFromCart(item.id)}>
+        Remove
+      </button>
+    </div>
+  </div>
+))
+  )}
+</div>
+
+      <div className="product-list">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onAddToCart={handleAddToCart}
+          />
+        ))}
+      </div>
+    </div>
   )
 }
 
