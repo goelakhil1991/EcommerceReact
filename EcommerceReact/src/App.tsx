@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProductCard from './components/ProductCard'
-import type { Product, CartItem } from './types/Product'
+import type { Product, CartItem, ApiProduct } from './types/Product'
 import './App.css'
 
 function App() {
@@ -11,6 +11,38 @@ function App() {
   ]
 
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error,setError] = useState<string | null>(null)
+  const [apiProducts, setApiProducts] = useState<ApiProduct[]>([])
+  useEffect(() => {console.log('App components loaded')}, [cartItems])
+  useEffect(() => {
+  async function fetchProducts() {
+    try {
+      const response = await fetch(
+        'https://fakestoreapi.com/products'
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data:ApiProduct[] = await response.json()
+      setApiProducts(data)
+      console.log('API Products:', data)
+
+    } catch (error) {
+      console.error('Error fetching products:', error)
+
+      setError(error instanceof Error ? error.message : 
+        'Something went wrong')
+    }
+    finally{
+      setLoading(false)
+    }
+  }
+
+  fetchProducts()
+}, [])
 
   function handleAddToCart(product: Product): void {
     setCartItems(previousItems => {
@@ -102,7 +134,28 @@ function removeFromCart(productId: number): void {
 ))
   )}
 </div>
+<h2>Products from API</h2>
+{loading && <p>Loading products...</p>}
+{error && <p style={{ color: 'red' }}>{error}</p>}
+<div className="product-list">
+  {apiProducts.map((product) => (
+    <div key={product.id} className="product-card">
+      <img
+        src={product.image}
+        alt={product.title}
+        width="120"
+      />
 
+      <h3>{product.title}</h3>
+
+      <p className="price">
+        ₹{product.price}
+      </p>
+
+      <p>{product.category}</p>
+    </div>
+  ))}
+</div>
       <div className="product-list">
         {products.map((product) => (
           <ProductCard
