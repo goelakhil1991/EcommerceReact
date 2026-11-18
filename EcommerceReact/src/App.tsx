@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import ProductCard from './components/ProductCard'
 import type { Product, CartItem, ApiProduct } from './types/Product'
 import './App.css'
+import {getProducts} from './services/productService'
 
 function App() {
   const products: Product[] = [
@@ -14,35 +15,31 @@ function App() {
   const [loading, setLoading] = useState<boolean>(true)
   const [error,setError] = useState<string | null>(null)
   const [apiProducts, setApiProducts] = useState<ApiProduct[]>([])
+  
   useEffect(() => {console.log('App components loaded')}, [cartItems])
   useEffect(() => {
-  async function fetchProducts() {
+  async function loadProducts() {
     try {
-      const response = await fetch(
-        'https://fakestoreapi.com/products'
-      )
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data:ApiProduct[] = await response.json()
+      const data = await getProducts()
       setApiProducts(data)
-      console.log('API Products:', data)
 
     } catch (error) {
       console.error('Error fetching products:', error)
 
-      setError(error instanceof Error ? error.message : 
-        'Something went wrong')
-    }
-    finally{
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong'
+      )
+
+    } finally {
       setLoading(false)
     }
   }
 
-  fetchProducts()
+  loadProducts()
 }, [])
+
 
   function handleAddToCart(product: Product): void {
     setCartItems(previousItems => {
