@@ -1,18 +1,15 @@
-import type { CartItem } from '../types/Product'
 
-interface CartProps {
-  cartItems: CartItem[]
-  cartTotal: number
-  onUpdateQuantity: (productId: number, change: number) => void
-  onRemove: (productId: number) => void
-}
+import { useCart } from '../context/CartContext'
 
-function Cart({
-  cartItems,
-  cartTotal,
-  onUpdateQuantity,
-  onRemove
-}: CartProps) {
+function Cart() {
+
+  const {
+    cartItems,
+    cartTotal,
+    updateQuantity,
+    removeFromCart
+  } = useCart()
+
   return (
     <div>
       <h1>Shopping Cart</h1>
@@ -40,17 +37,17 @@ function Cart({
             </div>
 
             <div>
-              <button onClick={() => onUpdateQuantity(item.id, -1)}>
+              <button onClick={() => updateQuantity(item.id, -1)}>
                 -
               </button>
 
               <span> {item.quantity} </span>
 
-              <button onClick={() => onUpdateQuantity(item.id, 1)}>
+              <button onClick={() => updateQuantity(item.id, 1)}>
                 +
               </button>
 
-              <button onClick={() => onRemove(item.id)}>
+              <button onClick={() => removeFromCart(item.id)}>
                 Remove
               </button>
             </div>

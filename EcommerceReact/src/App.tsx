@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Product, CartItem, ApiProduct } from './types/Product'
+import type { Product, ApiProduct } from './types/Product'
 import './App.css'
 import {getProducts} from './services/productService'
 import {Routes, Route, Link} from 'react-router-dom'
@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import Products from './pages/Products'
 import Cart from './pages/Cart'
 import AddProductPage from './pages/AddProductPage'
+import { useCart } from './context/CartContext'
 
 function App() {
   const products: Product[] = [
@@ -14,8 +15,8 @@ function App() {
     { id: 2, name: 'Headphones', price: 2500, inStock: true },
     { id: 3, name: 'Keyboard', price: 1800, inStock: false }
   ]
-
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
+const { cartItems } = useCart()
+ 
   const [loading, setLoading] = useState<boolean>(true)
   const [error,setError] = useState<string | null>(null)
   const [apiProducts, setApiProducts] = useState<ApiProduct[]>([])
@@ -45,48 +46,6 @@ function App() {
 }, [])
 
 
-  function handleAddToCart(product: Product): void {
-    setCartItems(previousItems => {
-      const existingItem = previousItems.find(
-        item => item.id === product.id
-      )
-
-      if (existingItem) {
-        return previousItems.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-
-      return [...previousItems, { ...product, quantity: 1 }]
-    })
-
-    console.log(`${product.name} added to cart`)
-  }
-
-  function updateQuantity(productId: number, change: number): void {
-  setCartItems(previousItems =>
-    previousItems
-      .map(item =>
-        item.id === productId
-          ? { ...item, quantity: item.quantity + change }
-          : item
-      )
-      .filter(item => item.quantity > 0)
-  )
-}
-
-function removeFromCart(productId: number): void {
-  setCartItems(previousItems =>
-    previousItems.filter(item => item.id !== productId)
-  )
-}
-
-  const cartTotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity, 0
-  )
-
   return (
     <div>
       <nav>
@@ -105,19 +64,13 @@ function removeFromCart(productId: number): void {
       apiProducts={apiProducts}
       loading={loading}
       error={error}
-      onAddToCart={handleAddToCart}
     />
   }
 />
   <Route
   path="/cart"
   element={
-    <Cart
-      cartItems={cartItems}
-      cartTotal={cartTotal}
-      onUpdateQuantity={updateQuantity}
-      onRemove={removeFromCart}
-    />
+    <Cart/>
   }
 />
   <Route path="/add-product" element={<AddProductPage />} />

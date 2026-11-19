@@ -1,21 +1,22 @@
 import ProductCard from '../components/ProductCard'
 import type { Product, ApiProduct } from '../types/Product'
+import {useCart} from '../context/CartContext'
 
 interface ProductsProps {
   products: Product[]
   apiProducts: ApiProduct[]
   loading: boolean
   error: string | null
-  onAddToCart: (product: Product) => void
 }
 
 function Products({
+    
   products,
   apiProducts,
   loading,
-  error,
-  onAddToCart
+  error
 }: ProductsProps) {
+    const {handleAddToCart} = useCart()
   return (
     <div>
       <h1>Our Products</h1>
@@ -43,7 +44,7 @@ function Products({
           <ProductCard
             key={product.id}
             product={product}
-            onAddToCart={onAddToCart}
+            onAddToCart={handleAddToCart}
           />
         ))}
       </div>
