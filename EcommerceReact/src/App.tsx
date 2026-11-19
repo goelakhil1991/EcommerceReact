@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react'
-import ProductCard from './components/ProductCard'
 import type { Product, CartItem, ApiProduct } from './types/Product'
 import './App.css'
 import {getProducts} from './services/productService'
+import {Routes, Route, Link} from 'react-router-dom'
+import Home from './pages/Home'
+import Products from './pages/Products'
+import Cart from './pages/Cart'
+import AddProductPage from './pages/AddProductPage'
 
 function App() {
   const products: Product[] = [
@@ -85,84 +89,42 @@ function removeFromCart(productId: number): void {
 
   return (
     <div>
-      <h1>My Ecommerce Store</h1>
+      <nav>
+  <Link to="/">Home</Link> |
+  <Link to="/products">Products</Link> |
+  <Link to="/cart">Cart</Link> |
+  <Link to="/add-product">Add Product</Link>
+</nav>
+<Routes>
+  <Route path="/" element={<Home />} />
+  <Route
+  path="/products"
+  element={
+    <Products
+      products={products}
+      apiProducts={apiProducts}
+      loading={loading}
+      error={error}
+      onAddToCart={handleAddToCart}
+    />
+  }
+/>
+  <Route
+  path="/cart"
+  element={
+    <Cart
+      cartItems={cartItems}
+      cartTotal={cartTotal}
+      onUpdateQuantity={updateQuantity}
+      onRemove={removeFromCart}
+    />
+  }
+/>
+  <Route path="/add-product" element={<AddProductPage />} />
+</Routes>
+      
 
-      <h2 className="cart-count">
-        Cart Items: {cartItems.reduce(
-          (total, item) => total + item.quantity, 0
-        )}
-      </h2>
-
-      <h2>
-        Cart Total: ₹{cartTotal.toLocaleString('en-IN')}
-      </h2>
-
-      <div>
-  <h2>Your Shopping Cart</h2>
-
-  {cartItems.length === 0 ? (
-    <p>Your cart is empty.</p>
-  ) : (
-    cartItems.map(item => (
-  <div key={item.id} className="cart-item">
-    <div>
-      <strong>{item.name}</strong>
-      <p>
-        ₹{item.price.toLocaleString('en-IN')} × {item.quantity}
-      </p>
-    </div>
-
-    <div>
-      <button onClick={() => updateQuantity(item.id, -1)}>
-        -
-      </button>
-
-      <span> {item.quantity} </span>
-
-      <button onClick={() => updateQuantity(item.id, 1)}>
-        +
-      </button>
-
-      <button onClick={() => removeFromCart(item.id)}>
-        Remove
-      </button>
-    </div>
-  </div>
-))
-  )}
 </div>
-<h2>Products from API</h2>
-{loading && <p>Loading products...</p>}
-{error && <p style={{ color: 'red' }}>{error}</p>}
-<div className="product-list">
-  {apiProducts.map((product) => (
-    <div key={product.id} className="product-card">
-      <img
-        src={product.image}
-        alt={product.title}
-        width="120"
-      />
-
-      <h3>{product.title}</h3>
-
-      <p className="price">
-        ₹{product.price}
-      </p>
-
-      <p>{product.category}</p>
-    </div>
-  ))}
-</div>
-      <div className="product-list">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onAddToCart={handleAddToCart}
-          />
-        ))}
-      </div>
-    </div>
   )
 }
 
